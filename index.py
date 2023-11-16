@@ -17,7 +17,8 @@ def index():
     x +="<a href=/welcome?nick=荃喜>歡迎蒞臨</a><br>"
     x +="<a href=/account>mmi密碼</a><br>"
     x +="<a href=/sort>人選之人名單</a><br>"
-    x +="<a href=/sort>精選圖書列表</a><br>"
+    x +="<a href=/books>精選圖書列表</a><br>"
+    x +="<a href=/search>圖書查詢</a><br>"
     return x
 
 @app.route("/mis")
@@ -58,18 +59,42 @@ def sort():
         Result += "文件內容：{}".format(doc.to_dict()) + "<br>"    
     return Result
 
-@app.route("/book")
-def book():
+@app.route("/books")
+def books():
     Result = ""
     db = firestore.client()
     collection_ref = db.collection("圖書精選")    
-    docs = collection_ref.order_by("date",direction=firestore.Query.DESCENDING).get()   
-    for doc in docs:         
-        Result += "文件內容：{}".format(doc.to_dict()) + "<br>"    
+    docs = collection_ref.order_by("anniversary").get()   
+    for doc in docs: 
+        bk = doc.to_dict()        
+        Result += "書名：<a href="+ bk["url"] + ">"+ bk["title"] + "</a><br><br>"
+        Result += "作者：" + bk["author"] + "<br><br>"
+        Result += str(bk["anniversary"]) + "週年紀念版""<br><br>" 
+        Result += "<img src=" + bk["cover"] +"></img><br><br>"        
     return Result
 
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    if request.method == "POST":
+        keyword = request.form["keyword"]
+        Result = "您輸入的關鍵字是：" + keyword
+        db = firestore.client()
+        collection_ref = db.collection("圖書精選")    
+        docs = collection_ref.order_by("anniversary").get()   
+        for doc in docs: 
+            bk = doc.to_dict() 
+            if keyword in bk["title"]:       
+                Result += "書名：<a href="+ bk["url"] + ">"+ bk["title"] + "</a><br><br>"
+                Result += "作者：" + bk["author"] + "<br><br>"
+                Result += str(bk["anniversary"]) + "週年紀念版""<br><br>" 
+                Result += "<img src=" + bk["cover"] +"></img><br><br>" 
+        return Result
+    else:
+        return render_template("searchbk.html")
 
 
-#if __name__ == "__main__":
-    #app.run()
+
+
+if __name__ == "__main__":
+    app.run()
 
