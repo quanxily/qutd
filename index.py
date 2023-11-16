@@ -17,6 +17,7 @@ def index():
     x +="<a href=/welcome?nick=荃喜>歡迎蒞臨</a><br>"
     x +="<a href=/account>mmi密碼</a><br>"
     x +="<a href=/sort>人選之人名單</a><br>"
+    x +="<a href=/sort>精選圖書列表</a><br>"
     return x
 
 @app.route("/mis")
@@ -52,6 +53,16 @@ def sort():
     Result = ""
     db = firestore.client()
     collection_ref = db.collection("人選之人")    
+    docs = collection_ref.order_by("date",direction=firestore.Query.DESCENDING).get()   
+    for doc in docs:         
+        Result += "文件內容：{}".format(doc.to_dict()) + "<br>"    
+    return Result
+
+@app.route("/book")
+def book():
+    Result = ""
+    db = firestore.client()
+    collection_ref = db.collection("圖書精選")    
     docs = collection_ref.order_by("date",direction=firestore.Query.DESCENDING).get()   
     for doc in docs:         
         Result += "文件內容：{}".format(doc.to_dict()) + "<br>"    
