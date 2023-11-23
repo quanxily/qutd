@@ -6,6 +6,9 @@ from firebase_admin import credentials, firestore
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 
+import requests
+from bs4 import BeautifulSoup
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -19,6 +22,7 @@ def index():
     x +="<a href=/sort>人選之人名單</a><br>"
     x +="<a href=/books>精選圖書列表</a><br>"
     x +="<a href=/search>圖書查詢</a><br>"
+    x +="<a href=/spider>請爬取子青老師的課程名稱、網址及圖片</a><br>"
     return x
 
 @app.route("/mis")
@@ -92,7 +96,21 @@ def search():
     else:
         return render_template("searchbk.html")
 
+@app.route("/spider")
+def spider():
+    info =""
+    url = "https://www1.pu.edu.tw/~tcyang/course.html"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    #print(Data.text)
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result=sp.select(".team-box")
 
+    for x in result:
+        info += x.find("h4").text+"<br>"
+        info += x.find("a").get("href")+"<br>"
+        info += "https://www1.pu.edu.tw/~tcyang/"+x.find("img").get("src")+"<br><br>"
+    return info
 
 
 #if __name__ == "__main__":
