@@ -108,6 +108,7 @@ def spider():
 
     for x in result:
         info += x.find("h4").text+"<br>"
+        info += x.find("p").text+"<br>"
         info += x.find("a").get("href")+"<br>"
         info += "https://www1.pu.edu.tw/~tcyang/"+x.find("img").get("src")+"<br><br>"
     return info
